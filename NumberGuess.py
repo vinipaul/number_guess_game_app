@@ -12,13 +12,13 @@ guess=stream.number_input("Enter your guess",min_value=1,max_value=100,step=1)
 if stream.button("Submit your Guess"):
     stream.session_state.chance=stream.session_state.chance+1   
     if guess==stream.session_state.generated_number:
-        stream.success(f"congrats!you guessed it right.you won at {stream.session_state.chance} chance")
+        stream.success(f"congrats!you guessed it right.you won at {stream.session_state.chance} th  chance")
         stream.session_state.guessed=True
     elif guess<stream.session_state.generated_number:
-        stream.warning("your guess is too low!try again...")
+        stream.warning("your guess is too low!Try again...")
     else :
-        stream.warning("your guess is too high!try again...")
+        stream.warning("your guess is too high!Try again...")
 if stream.session_state.guessed:
-    if stream.button("Play again"):
+    if stream.button("Play Again"):
         stream.session_state.generated_number=random.randint(1,100) 
         stream.session_state.guessed=False
