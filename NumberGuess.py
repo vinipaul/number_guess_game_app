@@ -1,7 +1,14 @@
 import base64
+import os
 import streamlit as stream
 import random
 import pandas as pd
+import psycopg2
+import datetime
+con=psycopg2.connect(dsn="postgresql://postgres:postgresvini@localhost:5432/number_guess_game_db")
+cur=con.cursor()
+# cur.execute("create table if not exists player_details_tb pl")
+
 if 'generated_number' not in stream.session_state:
     stream.session_state.generated_number=random.randint(1,100)
 if 'chance'not in stream.session_state:
@@ -10,9 +17,15 @@ if 'guessed' not in stream.session_state:
     stream.session_state.guessed=False
 if 'player_name' not in stream.session_state:
     stream.session_state.player_name=""
+if 'players_inserted' not in stream.session_state:
+    stream.session_state.players_inserted=False
+chances=0
+date=datetime.date.today().isoformat()
+flag=0
 stream.title("NUMBER GUESS GAME")
 stream.image("logo.png",width=200,)
-player_name=stream.text_input("Enter Your Name: ")
+stream.session_state.player_name=stream.text_input("Enter Your Name: ")
+player_name=stream.session_state.player_name
 stream.button("Let's Go")
 def autoplay_audio(file_path):
     with open(file_path, "rb") as f:
@@ -21,15 +34,25 @@ def autoplay_audio(file_path):
         f"<audio autoplay><source src='data:audio/mp3;base64,{b64}' type='audio/mp3'></audio>",
         unsafe_allow_html=True,
     )
+
 if player_name and stream.button:
+    if not stream.session_state.players_inserted:
+        cur.execute("insert into players (name,date,chances) values(%s,%s,%s) returning id;",( stream.session_state.player_name,date,stream.session_state.chance,))
+        cur.connection.commit()
+        stream.session_state.players_inserted=True
     stream.session_state.player_name=player_name
-    stream.write(f"Welcome {stream.session_state.player_name}")
+    if player_name =="Rejosh":
+        stream.write(f"Hi Rejoshetta")
+    else:
+        stream.write(f"Welcome {stream.session_state.player_name.capitalize()}")
     stream.write("I have  a number between 1 and 100.Can you guess it?")
     stream.write(f"chance {stream.session_state.chance}")
     guess=stream.number_input("Enter your guess",min_value=1,max_value=100,step=1)
     if stream.button("Submit your Guess"):
+        chances=stream.session_state.chance
         stream.session_state.chance=stream.session_state.chance+1   
         if guess==stream.session_state.generated_number:
+            stream.session_state.guessed=True
             autoplay_audio("cheering.mp3")
             stream.success(f"Congrats!you guessed it right.You won at  chance {stream.session_state.chance-1}!")
             player_details=[{
@@ -37,16 +60,23 @@ if player_name and stream.button:
         "Number of Attempt":stream.session_state.chance,
         "Result":"win",
         
-    }]
+    }]     
+            if stream.session_state.guessed==True: 
+                result='win'
+            else:
+                result="failed"
+            date=datetime.datetime.now()
             df=pd.DataFrame(player_details)
             df.to_csv("player_details.csv",mode="w",header=True,index=False)
-            stream.session_state.guessed=True
+            cur.execute("insert into player_details (player_name,date,result,chances) values(%s,%s,%s,%s) returning player_id;",(player_name,date,result,stream.session_state.chance,))
+            cur.connection.commit()
         elif guess<stream.session_state.generated_number:
             stream.warning("your guess is too low!Try again...")
         else :
             stream.warning("your guess is too high!Try again...")
+        
 if stream.session_state.guessed==True:
-    if stream.button("summary of your game") :
+    if stream.button("Game Summary") :
         df=pd.read_csv("player_details.csv")
         stream.dataframe(df)
     if stream.button("Play Again"):
@@ -54,3 +84,6 @@ if stream.session_state.guessed==True:
             stream.session_state.chance=1
             stream.session_state.generated_number=random.randint(1,100) 
             stream.session_state.guessed=False
+if stream.session_state.players_inserted:  
+    cur.execute("update players set chances=%s where name=%s and date=%s",((stream.session_state.chance)-1,stream.session_state.player_name,date))
+    con.commit()
