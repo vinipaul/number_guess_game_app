@@ -20,7 +20,7 @@ scope = [
 ]
 
 # Use the service account JSON key file
-creds = ServiceAccountCredentials.from_json_keyfile_name("user-tracking-keyfile.json", scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name("user-tracking.json", scope)
 
 # Authorize the client
 client = gspread.authorize(creds)
