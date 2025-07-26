@@ -68,7 +68,7 @@ if player_name and stream.button:
         sheet.append_row([stream.session_state.player_name, date,stream.session_state.chance])
         stream.session_state.players_inserted=True
     stream.session_state.player_name=player_name
-    if player_name =="Rejosh":
+    if player_name.lower() in ("rejosh",):
         stream.write(f"Hi Rejoshetta")
     else:
         stream.write(f"Welcome {stream.session_state.player_name.capitalize()}")
@@ -84,7 +84,7 @@ if player_name and stream.button:
             stream.success(f"Congrats!you guessed it right.You won at  chance {stream.session_state.chance-1}!")
             player_details=[{
         "Name":player_name,
-        "Number of Attempt":stream.session_state.chance,
+        "Number of Attempt":stream.session_state.chance-1,
         "Result":"win",
         
     }]     
