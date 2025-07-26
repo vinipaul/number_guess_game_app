@@ -8,7 +8,25 @@ import datetime
 # con=psycopg2.connect(dsn="postgresql://postgres:postgresvini@localhost:5432/number_guess_game_db")
 # cur=con.cursor()
 # cur.execute("create table if not exists player_details_tb pl")
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
+# Define the scope for accessing Google Sheets and Drive
+scope = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/drive"
+]
+
+# Use the service account JSON key file
+creds = ServiceAccountCredentials.from_json_keyfile_name("user-tracking-keyfile.json", scope)
+
+# Authorize the client
+client = gspread.authorize(creds)
+
+# Open the Google Sheet (replace with your actual sheet name)
+sheet = client.open("User Log").sheet1
 if 'generated_number' not in stream.session_state:
     stream.session_state.generated_number=random.randint(1,100)
 if 'chance'not in stream.session_state:
@@ -47,6 +65,7 @@ if player_name and stream.button:
     }]     
         df=pd.DataFrame(players)
         df.to_csv("players.csv",mode="a",header=True,index=False)
+        sheet.append_row([stream.session_state.player_name, date,stream.session_state.chance])
         stream.session_state.players_inserted=True
     stream.session_state.player_name=player_name
     if player_name =="Rejosh":
