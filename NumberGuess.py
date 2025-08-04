@@ -68,7 +68,6 @@ if player_name and stream.button:
         # sheet.append_row([stream.session_state.player_name, date,stream.session_state.chance])
         stream.session_state.players_inserted=True
     stream.session_state.player_name=player_name
-    # if player_name.lower() in ("rejosh",):
     if player_name.lower()=="rejosh":
         stream.write(f"Hi Rejoshetta")
     else:
