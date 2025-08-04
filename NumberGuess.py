@@ -8,8 +8,8 @@ import datetime
 # con=psycopg2.connect(dsn="postgresql://postgres:postgresvini@localhost:5432/number_guess_game_db")
 # cur=con.cursor()
 # cur.execute("create table if not exists player_details_tb pl")
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+# import gspread
+# from oauth2client.service_account import ServiceAccountCredentials
 
 # Define the scope for accessing Google Sheets and Drive
 # scope = [
@@ -68,7 +68,8 @@ if player_name and stream.button:
         # sheet.append_row([stream.session_state.player_name, date,stream.session_state.chance])
         stream.session_state.players_inserted=True
     stream.session_state.player_name=player_name
-    if player_name.lower() in ("rejosh",):
+    # if player_name.lower() in ("rejosh",):
+    if player_name.lower()=="rejosh":
         stream.write(f"Hi Rejoshetta")
     else:
         stream.write(f"Welcome {stream.session_state.player_name.capitalize()}")
